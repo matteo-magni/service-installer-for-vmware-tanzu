@@ -1,4 +1,4 @@
-resource "avi_network" "avi_se" {
+resource "avi_network" "se" {
   name                = var.avi_se_network_name
   cloud_ref           = avi_cloud.vsphere.id
   dhcp_enabled        = false
@@ -28,8 +28,7 @@ resource "avi_network" "avi_se" {
 }
 
 resource "avi_vrfcontext" "se" {
-  name       = "se"
-  tenant_ref = data.avi_tenant.admin.id
+  name      = "se"
   cloud_ref = avi_cloud.vsphere.id
 
   static_routes {
@@ -49,8 +48,7 @@ resource "avi_vrfcontext" "se" {
 }
 
 resource "avi_vrfcontext" "vip" {
-  name       = "vip"
-  tenant_ref = data.avi_tenant.admin.id
+  name      = "vip"
   cloud_ref = avi_cloud.vsphere.id
 
   static_routes {

@@ -21,6 +21,14 @@ variable "avi_version" {
   type    = string
   default = "20.1.8"
 }
+variable "avi_license_tier" {
+  type    = string
+  default = "ESSENTIALS"
+}
+variable "avi_license_type" {
+  type    = string
+  default = "LIC_CORES"
+}
 
 variable "vsphere_user" {
   type      = string
@@ -74,4 +82,65 @@ variable "avi_se_network_begin" {
 }
 variable "avi_se_network_end" {
   type = string
+}
+
+variable "se_name_prefix" {
+  type    = string
+  default = "Avi"
+}
+variable "vcpus_per_se" {
+  type    = number
+  default = 1
+}
+variable "avi_ha_mode" {
+  type        = string
+  default     = "HA_MODE_LEGACY_ACTIVE_STANDBY"
+  description = "ha_mode: HA_MODE_LEGACY_ACTIVE_STANDBY (Active/Standby), HA_MODE_SHARED_PAIR (Active/Active), HA_MODE_SHARED (N+M)"
+}
+variable "memory_per_se" {
+  type    = number
+  default = 2048
+}
+variable "disk_per_se" {
+  type    = number
+  default = 15
+}
+variable "min_se" {
+  type    = number
+  default = 1
+}
+variable "max_se" {
+  type    = number
+  default = 6
+}
+variable "min_scaleout_per_vs" {
+  type    = number
+  default = 1
+}
+variable "max_scaleout_per_vs" {
+  type    = number
+  default = 4
+}
+variable "dedicated_dispatcher_core" {
+  type    = string
+  default = "false"
+}
+variable "seg_vcenter_folder" {
+  type    = string
+  default = "AviSeFolder"
+}
+variable "seg_vcenter_cluster" {
+  type = string
+}
+variable "se_deprovision_delay" {
+  type    = number
+  default = 0
+}
+variable "algo" {
+  type    = string
+  default = "PLACEMENT_ALGO_PACKED"
+}
+variable "buffer_se" {
+  type    = number
+  default = 0
 }

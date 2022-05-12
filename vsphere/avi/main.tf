@@ -3,12 +3,11 @@ data "avi_tenant" "admin" {
 }
 
 resource "avi_cloud" "vsphere" {
-  name       = var.avi_cloud
-  tenant_ref = data.avi_tenant.admin.id
+  name = var.avi_cloud
 
   dhcp_enabled      = "true"
-  license_tier      = "ENTERPRISE"
-  license_type      = "LIC_CORES"
+  license_tier      = var.avi_license_tier
+  license_type      = var.avi_license_type
   vtype             = "CLOUD_VCENTER"
   ipam_provider_ref = avi_ipamdnsproviderprofile.vsphere_ipam.id
 
@@ -23,7 +22,7 @@ resource "avi_cloud" "vsphere" {
 
 }
 
-resource "avi_network" "avi_vip" {
+resource "avi_network" "vip" {
   name                = var.avi_vip_network_name
   cloud_ref           = avi_cloud.vsphere.id
   dhcp_enabled        = false
@@ -59,7 +58,7 @@ locals {
     replace = {
       internal_profile = {
         usable_networks = [
-          { nw_ref = avi_network.avi_vip.id },
+          { nw_ref = avi_network.vip.id },
         ]
       }
     }
@@ -97,19 +96,11 @@ resource "null_resource" "avi_ipamdnsproviderprofile_usablenetworks" {
 
   depends_on = [
     avi_ipamdnsproviderprofile.vsphere_ipam,
-    avi_network.avi_vip,
+    avi_network.vip,
   ]
 }
 
 resource "avi_ipamdnsproviderprofile" "vsphere_ipam" {
-  name       = "vsphere_ipam"
-  tenant_ref = data.avi_tenant.admin.id
-  type       = "IPAMDNS_TYPE_INTERNAL"
-
-  # prevent terraform to remove networks added via provisioners
-  lifecycle {
-    ignore_changes = [
-      internal_profile
-    ]
-  }
+  name = "vsphere_ipam"
+  type = "IPAMDNS_TYPE_INTERNAL"
 }
