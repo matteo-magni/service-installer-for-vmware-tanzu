@@ -36,21 +36,42 @@ variable "vsphere_server" {
 variable "vsphere_datacenter" {
   type = string
 }
-variable "avi_mgmt_network" {
+variable "avi_mgmt_network_name" {
   type = string
 }
-variable "avi_workload_network_name" {
+variable "avi_vip_network_name" {
   type = string
 }
-variable "avi_workload_network_addr" {
+variable "avi_vip_network_addr" {
   type = string
 }
-variable "avi_workload_network_mask" {
+variable "avi_vip_network_mask" {
   type = string
 }
-variable "avi_workload_network_begin" {
+variable "avi_vip_network_gateway" {
   type = string
 }
-variable "avi_workload_network_end" {
+variable "avi_vip_network_begin" {
+  type = string
+}
+variable "avi_vip_network_end" {
+  type = string
+}
+variable "avi_se_network_name" {
+  type = string
+}
+variable "avi_se_network_addr" {
+  type = string
+}
+variable "avi_se_network_mask" {
+  type = string
+}
+variable "avi_se_network_gateway" {
+  type = string
+}
+variable "avi_se_network_begin" {
+  type = string
+}
+variable "avi_se_network_end" {
   type = string
 }
