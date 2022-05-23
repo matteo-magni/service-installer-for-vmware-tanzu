@@ -105,3 +105,60 @@ data "vsphere_folder" "folder" {
 #     ]
 #   }
 # }
+
+data "vsphere_content_library" "ova" {
+  name = "ova"
+}
+
+data "vsphere_content_library_item" "avi_controller" {
+  name       = "avi-controller-21.1.4-9210"
+  type       = "ovf"
+  library_id = data.vsphere_content_library.ova.id
+}
+
+resource "vsphere_virtual_machine" "avi_controller" {
+  name             = local.avi_controller_name
+  resource_pool_id = data.vsphere_resource_pool.default.id
+  datastore_id     = data.vsphere_datastore.datastore.id
+  folder           = trimprefix(data.vsphere_folder.folder.path, "/${data.vsphere_datacenter.datacenter.name}/vm")
+
+  num_cpus = 8
+  memory   = 24576
+  guest_id = "ubuntu64Guest"
+
+  network_interface {
+    network_id = data.vsphere_network.network.id
+  }
+  disk {
+    label            = "disk0"
+    size             = 128
+    thin_provisioned = true
+  }
+  clone {
+    template_uuid = data.vsphere_content_library_item.avi_controller.id
+  }
+  vapp {
+    properties = {
+      "default-gw"          = var.avi_gateway
+      "mgmt-ip"             = var.avi_ipaddress
+      "mgmt-mask"           = var.avi_netmask
+      "sysadmin-public-key" = tls_private_key.avi_controller.public_key_openssh
+    }
+  }
+  lifecycle {
+    ignore_changes = [
+      vapp[0].properties
+    ]
+  }
+
+}
+
+resource "null_resource" "wait_for_avi_controller" {
+  provisioner "local-exec" {
+    command = "./scripts/wait_for_avi_controller.sh https://${var.avi_ipaddress} 200 ${var.avi_controller_provisioning_timeout}"
+  }
+
+  depends_on = [
+    vsphere_virtual_machine.avi_controller
+  ]
+}

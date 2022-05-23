@@ -27,7 +27,7 @@ variable "vsphere_network" {
   default = "VM Network"
 }
 variable "avi_controller_prefix" {
-  type = string
+  type    = string
   default = "avi-controller"
 }
 
@@ -42,4 +42,9 @@ variable "avi_netmask" {
 }
 variable "avi_gateway" {
   type = string
+}
+variable "avi_controller_provisioning_timeout" {
+  type = string
+  default = "20m"
+  description = "Maximum time for AVI controller to be ready after VM creation"
 }
