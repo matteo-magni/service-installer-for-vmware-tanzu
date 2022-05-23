@@ -86,12 +86,12 @@ resource "null_resource" "avi_ipamdnsproviderprofile_usablenetworks" {
   }
 
   provisioner "local-exec" {
-    command = "./scripts/ipam_networks_update.sh -h ${self.triggers.avi_controller} -u ${self.triggers.avi_username} -p '${replace(self.triggers.avi_password, "'", "'\"'\"")}' -v ${self.triggers.avi_version} -i ${self.triggers.ipam_uuid} -j '${self.triggers.ipam_http_body_apply}'"
+    command = "../scripts/ipam_networks_update.sh -h ${self.triggers.avi_controller} -u ${self.triggers.avi_username} -p '${replace(self.triggers.avi_password, "'", "'\"'\"")}' -v ${self.triggers.avi_version} -i ${self.triggers.ipam_uuid} -j '${self.triggers.ipam_http_body_apply}'"
   }
 
   provisioner "local-exec" {
     when    = destroy
-    command = "./scripts/ipam_networks_update.sh -h ${self.triggers.avi_controller} -u ${self.triggers.avi_username} -p '${replace(self.triggers.avi_password, "'", "'\"'\"")}' -v ${self.triggers.avi_version} -i ${self.triggers.ipam_uuid} -j '${self.triggers.ipam_http_body_destroy}'"
+    command = "../scripts/ipam_networks_update.sh -h ${self.triggers.avi_controller} -u ${self.triggers.avi_username} -p '${replace(self.triggers.avi_password, "'", "'\"'\"")}' -v ${self.triggers.avi_version} -i ${self.triggers.ipam_uuid} -j '${self.triggers.ipam_http_body_destroy}'"
   }
 
   depends_on = [

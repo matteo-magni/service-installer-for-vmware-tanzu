@@ -8,6 +8,6 @@ declare TIMEOUT=$3
 
 HOST=$HOST STATUS=$STATUS timeout --foreground -s TERM $TIMEOUT bash -c \
     'while [[ ${STATUS_RECEIVED} != ${STATUS} ]];\
-        do STATUS_RECEIVED=$(curl -skLfSo /dev/null -w ''%{http_code}'' ${HOST}) && \
-        sleep 30;\
+        do STATUS_RECEIVED=$(curl -skLfSo /dev/null --connect-timeout 5 -w ''%{http_code}'' ${HOST}) ; \
+        sleep 25;\
     done'

@@ -80,3 +80,11 @@ provider "registry.terraform.io/hashicorp/vsphere" {
     "zh:d9762c7621d3573d7adc31c37168a49cebbd7fb3aa3bcb8b8dd322c7d05dbfc2",
   ]
 }
+
+provider "registry.terraform.io/vmware/avi" {
+  version     = "21.1.4"
+  constraints = "21.1.4"
+  hashes = [
+    "h1:+SX2esLBJWX5HQZbZCAk/L2qsR2EGMB25APsTElRkaE=",
+  ]
+}

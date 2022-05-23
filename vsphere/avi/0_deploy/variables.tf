@@ -44,7 +44,27 @@ variable "avi_gateway" {
   type = string
 }
 variable "avi_controller_provisioning_timeout" {
-  type = string
-  default = "20m"
+  type        = string
+  default     = "20m"
   description = "Maximum time for AVI controller to be ready after VM creation"
+}
+variable "avi_default_password" {
+  type    = string
+  default = "58NFaGDJm(PJH0G"
+}
+variable "avi_tenant" {
+  type    = string
+  default = "admin"
+}
+variable "avi_username" {
+  type      = string
+  sensitive = true
+}
+variable "avi_password" {
+  type      = string
+  sensitive = true
+}
+variable "avi_version" {
+  type    = string
+  default = "20.1.8"
 }

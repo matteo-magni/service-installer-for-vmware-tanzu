@@ -2,15 +2,22 @@
 
 set -euo pipefail
 
-AVI_HOST=
-AVI_USER=
-AVI_PASS=
-AVI_VERSION=
-AVI_IPAM_UUID=
-BODY=
+API_SCRIPT=$(dirname $0)/avi.sh
+declare -r AVI_METHOD="PATCH"
+
+AVI_HOST="${AVI_HOST:-}"
+AVI_USER="${AVI_USER:-}"
+AVI_PASS="${AVI_PASS:-}"
+AVI_VERSION="${AVI_VERSION:-}"
+JSON_BODY="${JSON_BODY:-}"
+AVI_IPAM_UUID="${AVI_IPAM_UUID:-}"
 
 usage() {
-    echo "Usage: $0 -h AVI_HOST -u AVI_USER -p AVI_PASS -v AVI_VERSION -i AVI_IPAM_UUID -j JSON_BODY"
+    cat <<EOF
+Usage: $0 [-h AVI_HOST] [-u AVI_USER] [-p AVI_PASS] [-v AVI_VERSION] [-j JSON_BODY] [-i AVI_IPAM_UUID]
+All arguments must be provided either on the CLI or via environment variables
+EOF
+
 }
 
 while getopts 'h:u:p:v:i:j:' opt; do
@@ -42,16 +49,8 @@ done
 
 [ -z "$AVI_HOST" ] || [ -z "$AVI_USER" ] || [ -z "$AVI_PASS" ] || [ -z "$AVI_VERSION" ] || [ -z "$AVI_IPAM_UUID" ] || [ -z "$JSON_BODY" ] && echo "ERROR: Missing arguments" >&2 && usage >&2 && exit 1
 
-COOKIES=$($(dirname $0)/get_cookies.sh -h ${AVI_HOST} -u ${AVI_USER} -p ${AVI_PASS})
-TOKEN=$(echo $COOKIES | grep -oE 'csrftoken=[^;]+' | cut -d= -f2)
+AVI_ENDPOINT="/ipamdnsproviderprofile/${AVI_IPAM_UUID}"
 
-set -x
-curl -sfSLk \
-    -X PATCH \
-    -b "${COOKIES}" \
-    -H "Referer: https://${AVI_HOST}" \
-    -H "Content-Type: application/json" \
-    -H "X-Avi-Version: ${AVI_VERSION}" \
-    -H "X-CSRFToken: ${TOKEN}" \
-    -d "${JSON_BODY}" \
-    https://${AVI_HOST}/api/ipamdnsproviderprofile/${AVI_IPAM_UUID}
+export AVI_METHOD AVI_HOST AVI_USER AVI_PASS AVI_VERSION JSON_BODY AVI_ENDPOINT
+
+$API_SCRIPT
