@@ -49,8 +49,7 @@ variable "avi_controller_provisioning_timeout" {
   description = "Maximum time for AVI controller to be ready after VM creation"
 }
 variable "avi_default_password" {
-  type    = string
-  default = "58NFaGDJm(PJH0G"
+  type = string
 }
 variable "avi_tenant" {
   type    = string
@@ -59,6 +58,7 @@ variable "avi_tenant" {
 variable "avi_username" {
   type      = string
   sensitive = true
+  default   = "admin"
 }
 variable "avi_password" {
   type      = string
@@ -67,4 +67,18 @@ variable "avi_password" {
 variable "avi_version" {
   type    = string
   default = "20.1.8"
+}
+
+variable "avi_ssl_keycert" {
+  type = map(string)
+  default = {
+    key  = ""
+    cert = ""
+  }
+}
+
+variable "backup_passphrase" {
+  type      = string
+  default   = ""
+  sensitive = true
 }
