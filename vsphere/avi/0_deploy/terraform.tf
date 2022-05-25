@@ -21,7 +21,12 @@ terraform {
 
     tls = {
       source  = "hashicorp/tls"
-      version = "3.3.0"
+      version = "3.4.0"
+    }
+
+    http = {
+      source  = "hashicorp/http"
+      version = "2.1.0"
     }
 
     null = {
@@ -43,7 +48,7 @@ provider "vsphere" {
 provider "avi" {
   avi_username   = var.avi_username
   avi_tenant     = var.avi_tenant
-  avi_password   = var.avi_password
+  avi_password   = local.avi_password
   avi_controller = var.avi_ipaddress
   avi_version    = var.avi_version
 }

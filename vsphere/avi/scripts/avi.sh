@@ -54,7 +54,13 @@ done
 
 shift $((OPTIND-1))
 
-[ -z "$AVI_HOST" ] || [ -z "$AVI_USER" ] || [ -z "$AVI_PASS" ] || [ -z "$AVI_VERSION" ] || [ -z "$AVI_ENDPOINT" ] || [ -z "$AVI_METHOD" ] || [ -z "$JSON_BODY" -a "$AVI_METHOD" != "GET" ] && echo "ERROR: Missing arguments" >&2 && usage >&2 && exit 1
+[ -z "$AVI_HOST" ]  && echo "ERROR: AVI_HOST argument missing" >&2 && usage >&2 && exit 1
+[ -z "$AVI_USER" ]  && echo "ERROR: AVI_USER argument missing" >&2 && usage >&2 && exit 1
+[ -z "$AVI_PASS" ]  && echo "ERROR: AVI_PASS argument missing" >&2 && usage >&2 && exit 1
+[ -z "$AVI_VERSION" ]  && echo "ERROR: AVI_VERSION argument missing" >&2 && usage >&2 && exit 1
+[ -z "$AVI_ENDPOINT" ]  && echo "ERROR: AVI_ENDPOINT argument missing" >&2 && usage >&2 && exit 1
+[ -z "$AVI_METHOD" ]  && echo "ERROR: AVI_METHOD argument missing" >&2 && usage >&2 && exit 1
+[ -z "$JSON_BODY" -a "$AVI_METHOD" != "GET" -a "$AVI_METHOD" != "DELETE" ] && echo "ERROR: JSON_BODY argument missing" >&2 && usage >&2 && exit 1
 
 if [ "$DEBUG" == "1" ]; then set -x; fi
 

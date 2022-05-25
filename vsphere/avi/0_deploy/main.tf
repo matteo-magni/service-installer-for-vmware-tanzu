@@ -92,34 +92,10 @@ resource "vsphere_virtual_machine" "avi_controller" {
     ]
   }
 
-}
-
-resource "null_resource" "wait_for_avi_controller" {
   provisioner "local-exec" {
-    command = "../scripts/wait_for_avi_controller.sh https://${var.avi_ipaddress} 200 ${var.avi_controller_provisioning_timeout}"
+    command = "../scripts/wait_for_avi.sh https://${var.avi_ipaddress} 200 ${var.avi_provisioning_timeout}"
   }
 
-  depends_on = [
-    vsphere_virtual_machine.avi_controller
-  ]
-
-  lifecycle {
-    # wait again if the virtual machine get recreated
-    # replace_triggered_by is a new lifecycle argument as of terraform v1.2.0
-    replace_triggered_by = [
-      vsphere_virtual_machine.avi_controller
-    ]
-  }
-}
-
-locals {
-  newpassword_body = {
-    username     = var.avi_username
-    password     = var.avi_password
-    old_password = var.avi_default_password
-  }
-}
-resource "null_resource" "change_admin_password" {
   provisioner "local-exec" {
     command = "../scripts/avi.sh"
     environment = {
@@ -129,16 +105,24 @@ resource "null_resource" "change_admin_password" {
       AVI_PASS     = var.avi_default_password
       AVI_VERSION  = var.avi_version
       AVI_ENDPOINT = "useraccount"
-      JSON_BODY    = jsonencode(local.newpassword_body)
+      JSON_BODY = jsonencode({
+        username     = var.avi_username
+        password     = local.avi_password
+        old_password = var.avi_default_password
+      })
     }
   }
 
-  depends_on = [
-    null_resource.wait_for_avi_controller
-  ]
-  lifecycle {
-    replace_triggered_by = [
-      vsphere_virtual_machine.avi_controller
-    ]
-  }
+}
+
+locals {
+  avi_password = var.avi_password == "" ? random_string.avi_password.id : var.avi_password
+}
+
+resource "random_string" "avi_password" {
+  length  = 32
+  special = true
+  lower   = true
+  upper   = true
+  number  = true
 }

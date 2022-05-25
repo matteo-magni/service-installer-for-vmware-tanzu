@@ -31,9 +31,6 @@ variable "avi_controller_prefix" {
   default = "avi-controller"
 }
 
-variable "local_ovf_path" {
-  type = string
-}
 variable "avi_ipaddress" {
   type = string
 }
@@ -43,7 +40,7 @@ variable "avi_netmask" {
 variable "avi_gateway" {
   type = string
 }
-variable "avi_controller_provisioning_timeout" {
+variable "avi_provisioning_timeout" {
   type        = string
   default     = "20m"
   description = "Maximum time for AVI controller to be ready after VM creation"
@@ -62,23 +59,62 @@ variable "avi_username" {
 }
 variable "avi_password" {
   type      = string
+  default   = ""
   sensitive = true
 }
 variable "avi_version" {
   type    = string
-  default = "20.1.8"
+  default = "21.1.4"
 }
 
-variable "avi_ssl_keycert" {
-  type = map(string)
-  default = {
-    key  = ""
-    cert = ""
-  }
-}
-
-variable "backup_passphrase" {
+variable "avi_ssl_key" {
   type      = string
   default   = ""
   sensitive = true
+}
+variable "avi_ssl_certificate" {
+  type    = string
+  default = ""
+}
+variable "avi_ssl_cacerts" {
+  type    = string
+  default = ""
+}
+
+variable "avi_backup_passphrase" {
+  type      = string
+  default   = ""
+  sensitive = true
+}
+variable "avi_dns_domain" {
+  type    = string
+  default = ""
+}
+variable "avi_dns_servers_ipv4" {
+  type = set(string)
+}
+variable "avi_ntp_servers_fqdn" {
+  type = set(string)
+  default = [
+    "pool.ntp.org"
+  ]
+}
+variable "avi_session_timeout" {
+  type    = number
+  default = 15
+}
+variable "avi_license_key" {
+  type      = string
+  default   = ""
+  sensitive = true
+}
+variable "avi_license_tier" {
+  type    = string
+  default = "ESSENTIALS"
+
+  validation {
+    condition     = contains(["ESSENTIALS", "ENTERPRISE"], var.avi_license_tier)
+    error_message = "Allowed values for avi_license_tier are \"ESSENTIALS\" or \"ENTERPRISE\"."
+  }
+
 }
