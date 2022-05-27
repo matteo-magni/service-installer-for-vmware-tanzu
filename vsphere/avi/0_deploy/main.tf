@@ -93,7 +93,7 @@ resource "vsphere_virtual_machine" "avi_controller" {
   }
 
   provisioner "local-exec" {
-    command = "../scripts/wait_for_avi.sh https://${var.avi_ipaddress} 200 ${var.avi_provisioning_timeout}"
+    command = "../scripts/wait_http.sh https://${var.avi_ipaddress} 200 ${var.avi_provisioning_timeout}"
   }
 
   provisioner "local-exec" {
