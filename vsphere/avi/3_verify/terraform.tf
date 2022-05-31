@@ -24,6 +24,11 @@ terraform {
       version = "3.4.0"
     }
 
+    http = {
+      source  = "hashicorp/http"
+      version = "2.1.0"
+    }
+
   }
 
 }
@@ -31,7 +36,7 @@ terraform {
 data "terraform_remote_state" "deploy" {
   backend = "local"
   config = {
-    path = "../0_deploy/terraform.tfstate"
+    path = "../1_deploy/terraform.tfstate"
   }
 }
 

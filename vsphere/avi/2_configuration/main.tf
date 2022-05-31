@@ -168,7 +168,7 @@ resource "null_resource" "avi_ipamdnsproviderprofile_usablenetworks" {
   }
 
   provisioner "local-exec" {
-    when = destroy
+    when    = destroy
     command = "../scripts/avi.sh"
     environment = {
       AVI_METHOD   = "PATCH"

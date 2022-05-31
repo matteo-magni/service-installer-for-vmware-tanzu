@@ -42,6 +42,16 @@ variable "vsphere_network" {
   type    = string
   default = "VM Network"
 }
+variable "vsphere_content_library_ubuntu" {
+  type        = string
+  default     = "ova"
+  description = "Name of the content library that stores the Ubuntu OVA"
+}
+variable "vsphere_content_library_item_ubuntu" {
+  type        = string
+  default     = "focal-server-cloudimg-amd64"
+  description = "Name of the Ubuntu OVA in `vsphere_content_library_ubuntu` content library"
+}
 
 variable "testvm_ip_cidr" {
   type = string

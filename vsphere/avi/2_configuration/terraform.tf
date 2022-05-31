@@ -24,7 +24,7 @@ terraform {
 data "terraform_remote_state" "deploy" {
   backend = "local"
   config = {
-    path = "../0_deploy/terraform.tfstate"
+    path = "../1_deploy/terraform.tfstate"
   }
 }
 

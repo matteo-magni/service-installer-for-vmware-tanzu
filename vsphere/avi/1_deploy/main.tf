@@ -6,49 +6,12 @@ resource "random_string" "avi_controller_name" {
   number  = true
 }
 
-locals {
-  avi_controller_name = "${var.avi_controller_prefix}-${random_string.avi_controller_name.id}"
-}
-
 resource "tls_private_key" "avi_controller" {
   algorithm = "ED25519"
 }
 
-data "vsphere_datacenter" "datacenter" {
-  name = var.vsphere_datacenter
-}
-data "vsphere_datastore" "datastore" {
-  name          = var.vsphere_datastore
-  datacenter_id = data.vsphere_datacenter.datacenter.id
-}
-data "vsphere_compute_cluster" "cluster" {
-  name          = var.vsphere_compute_cluster
-  datacenter_id = data.vsphere_datacenter.datacenter.id
-}
-data "vsphere_resource_pool" "default" {
-  name          = format("%s%s", data.vsphere_compute_cluster.cluster.name, "/Resources")
-  datacenter_id = data.vsphere_datacenter.datacenter.id
-}
-data "vsphere_host" "host" {
-  name          = var.vsphere_host
-  datacenter_id = data.vsphere_datacenter.datacenter.id
-}
-data "vsphere_network" "network" {
-  name          = var.vsphere_network
-  datacenter_id = data.vsphere_datacenter.datacenter.id
-}
-data "vsphere_folder" "folder" {
-  path = var.vsphere_folder
-}
-
-data "vsphere_content_library" "ova" {
-  name = "ova"
-}
-
-data "vsphere_content_library_item" "avi_controller" {
-  name       = "avi-controller-21.1.4-9210"
-  type       = "ovf"
-  library_id = data.vsphere_content_library.ova.id
+locals {
+  avi_controller_name = "${var.avi_controller_prefix}-${random_string.avi_controller_name.id}"
 }
 
 # resource "vsphere_content_library_item" "avi_controller" {
@@ -96,6 +59,7 @@ resource "vsphere_virtual_machine" "avi_controller" {
     command = "../scripts/wait_http.sh https://${var.avi_ipaddress} 200 ${var.avi_provisioning_timeout}"
   }
 
+  # change admin default password
   provisioner "local-exec" {
     command = "../scripts/avi.sh"
     environment = {
@@ -116,7 +80,7 @@ resource "vsphere_virtual_machine" "avi_controller" {
 }
 
 locals {
-  avi_password = var.avi_password == "" ? random_string.avi_password.id : var.avi_password
+  avi_password = var.avi_password == "" ? var.avi_default_password : (var.avi_password == "RANDOM" ? random_string.avi_password.id : var.avi_password)
 }
 
 resource "random_string" "avi_password" {
