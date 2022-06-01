@@ -54,7 +54,17 @@ resource "avi_virtualservice" "dummy" {
   cloud_type              = "CLOUD_VCENTER"
   pool_ref                = avi_pool.dummy.id
   vsvip_ref               = avi_vsvip.dummy.id
+  se_group_ref            = data.avi_serviceenginegroup.group.id
   vrf_context_ref         = data.avi_network.vip.vrf_context_ref
+}
+
+# wait 60 seconds to allow Service Engines VMs to be created
+resource "time_sleep" "wait_for_ses" {
+  create_duration = "60s"
+
+  depends_on = [
+    avi_virtualservice.dummy
+  ]
 }
 
 resource "random_pet" "ubuntu" {
@@ -74,8 +84,6 @@ resource "vsphere_virtual_machine" "ubuntu" {
 
   network_interface {
     network_id = data.vsphere_network.network.id
-    # use_static_mac = true
-    # mac_address    = local.mac_address
   }
   disk {
     label            = "disk0"
@@ -120,15 +128,7 @@ data "http" "vip" {
   url = "http://${local.vip_addr}"
 
   depends_on = [
-    vsphere_virtual_machine.ubuntu
+    vsphere_virtual_machine.ubuntu,
+    time_sleep.wait_for_ses,
   ]
 }
-
-# resource "random_integer" "mac_address" {
-#   min = 0
-#   max = pow(2, 24) - 1
-# }
-
-# locals {
-#   mac_address = "00:50:56:${join(":", regexall("..", format("%x", random_integer.mac_address.id)))}"
-# }

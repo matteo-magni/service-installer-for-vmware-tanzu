@@ -45,6 +45,10 @@ data "avi_cloud" "cloud" {
   name = var.avi_cloud
 }
 
+data "avi_serviceenginegroup" "group" {
+  name = var.avi_serviceenginegroup
+}
+
 data "avi_network" "vip" {
   name      = var.avi_vip_network_name
   cloud_ref = data.avi_cloud.cloud.id

@@ -11,6 +11,10 @@ variable "avi_cloud" {
   type    = string
   default = "vsphere"
 }
+variable "avi_serviceenginegroup" {
+  type    = string
+  default = "default"
+}
 variable "avi_dummy_vip" {
   type = string
 }

@@ -10,18 +10,8 @@ resource "tls_private_key" "avi_controller" {
   algorithm = "ED25519"
 }
 
-locals {
-  avi_controller_name = "${var.avi_controller_prefix}-${random_string.avi_controller_name.id}"
-}
-
-# resource "vsphere_content_library_item" "avi_controller" {
-#   name       = "avi-controller-21.1.4-9210"
-#   type       = "ovf"
-#   library_id = data.vsphere_content_library.ova.id
-# }
-
 resource "vsphere_virtual_machine" "avi_controller" {
-  name             = local.avi_controller_name
+  name             = "${var.avi_controller_prefix}-${random_string.avi_controller_name.id}"
   resource_pool_id = data.vsphere_resource_pool.default.id
   datastore_id     = data.vsphere_datastore.datastore.id
   folder           = trimprefix(data.vsphere_folder.folder.path, "/${data.vsphere_datacenter.datacenter.name}/vm")
@@ -55,11 +45,12 @@ resource "vsphere_virtual_machine" "avi_controller" {
     ]
   }
 
+  # wait for https endpoint to be available
   provisioner "local-exec" {
     command = "../scripts/wait_http.sh https://${var.avi_ipaddress} 200 ${var.avi_provisioning_timeout}"
   }
 
-  # change admin default password
+  # change user default password
   provisioner "local-exec" {
     command = "../scripts/avi.sh"
     environment = {
