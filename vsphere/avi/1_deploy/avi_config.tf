@@ -16,7 +16,7 @@ resource "avi_backupconfiguration" "default" {
   save_local        = true
 
   depends_on = [
-    vsphere_virtual_machine.avi_controller
+    null_resource.avi_ready
   ]
 }
 
@@ -29,7 +29,7 @@ resource "avi_controllerproperties" "default" {
   ]
 
   depends_on = [
-    vsphere_virtual_machine.avi_controller
+    null_resource.avi_ready
   ]
 }
 
@@ -102,7 +102,7 @@ resource "avi_systemconfiguration" "default" {
   }
 
   depends_on = [
-    vsphere_virtual_machine.avi_controller,
+    null_resource.avi_ready,
     null_resource.license,
   ]
 }
@@ -123,7 +123,7 @@ resource "null_resource" "license" {
   }
 
   depends_on = [
-    vsphere_virtual_machine.avi_controller
+    null_resource.avi_ready
   ]
 }
 
@@ -150,7 +150,7 @@ resource "avi_sslkeyandcertificate" "controller" {
   }
 
   depends_on = [
-    vsphere_virtual_machine.avi_controller
+    null_resource.avi_ready
   ]
 }
 
@@ -178,7 +178,7 @@ resource "avi_sslkeyandcertificate" "ca" {
   }
 
   depends_on = [
-    vsphere_virtual_machine.avi_controller
+    null_resource.avi_ready
   ]
 }
 
@@ -209,6 +209,6 @@ resource "avi_sslprofile" "mozilla_intermediate" {
   enable_ssl_session_reuse      = false
 
   depends_on = [
-    vsphere_virtual_machine.avi_controller
+    null_resource.avi_ready
   ]
 }

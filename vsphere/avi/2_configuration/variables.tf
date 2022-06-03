@@ -19,7 +19,7 @@ variable "avi_controller" {
 }
 variable "avi_version" {
   type    = string
-  default = "20.1.8"
+  default = "21.1.4"
 }
 variable "avi_license_tier" {
   type    = string
@@ -30,23 +30,24 @@ variable "avi_license_type" {
   default = "LIC_CORES"
 }
 
-variable "vsphere_user" {
+variable "vsphere_cloud_user" {
   type      = string
   sensitive = true
 }
-variable "vsphere_password" {
+variable "vsphere_cloud_password" {
   type      = string
   sensitive = true
 }
-variable "vsphere_server" {
+variable "vsphere_cloud_server" {
   type = string
 }
-variable "vsphere_datacenter" {
+variable "vsphere_cloud_datacenter" {
   type = string
 }
-variable "avi_mgmt_network_name" {
+variable "vsphere_cloud_network" {
   type = string
 }
+
 variable "avi_vip_network_name" {
   type = string
 }
@@ -65,6 +66,7 @@ variable "avi_vip_network_begin" {
 variable "avi_vip_network_end" {
   type = string
 }
+
 variable "avi_se_network_name" {
   type = string
 }
@@ -88,14 +90,18 @@ variable "se_name_prefix" {
   type    = string
   default = "Avi"
 }
-variable "vcpus_per_se" {
-  type    = number
-  default = 1
-}
 variable "avi_ha_mode" {
   type        = string
   default     = "HA_MODE_LEGACY_ACTIVE_STANDBY"
   description = "ha_mode: HA_MODE_LEGACY_ACTIVE_STANDBY (Active/Standby), HA_MODE_SHARED_PAIR (Active/Active), HA_MODE_SHARED (N+M)"
+  validation {
+    condition     = contains(["HA_MODE_LEGACY_ACTIVE_STANDBY", "HA_MODE_SHARED_PAIR", "HA_MODE_SHARED"], var.avi_ha_mode)
+    error_message = "Acceptable values: HA_MODE_LEGACY_ACTIVE_STANDBY (Active/Standby), HA_MODE_SHARED_PAIR (Active/Active), HA_MODE_SHARED (N+M)"
+  }
+}
+variable "vcpus_per_se" {
+  type    = number
+  default = 1
 }
 variable "memory_per_se" {
   type    = number
@@ -121,26 +127,35 @@ variable "max_scaleout_per_vs" {
   type    = number
   default = 4
 }
+variable "algo" {
+  type    = string
+  default = "PLACEMENT_ALGO_PACKED"
+  validation {
+    condition     = contains(["PLACEMENT_ALGO_PACKED", "PLACEMENT_ALGO_DISTRIBUTED"], var.algo)
+    error_message = "Acceptable values: PLACEMENT_ALGO_PACKED, PLACEMENT_ALGO_DISTRIBUTED"
+  }
+}
 variable "dedicated_dispatcher_core" {
   type    = string
   default = "false"
 }
-variable "seg_vcenter_folder" {
+variable "se_vcenter_folder" {
   type    = string
   default = "AviSeFolder"
 }
-variable "seg_vcenter_cluster" {
+variable "se_vsphere_cluster" {
   type = string
 }
 variable "se_deprovision_delay" {
   type    = number
   default = 0
 }
-variable "algo" {
-  type    = string
-  default = "PLACEMENT_ALGO_PACKED"
-}
 variable "buffer_se" {
   type    = number
   default = 0
+}
+variable "avi_serviceenginegroup_name" {
+  type        = string
+  default     = ""
+  description = "Name of the default Service Engine Group to create. Empty string means it will be named after the cloud."
 }

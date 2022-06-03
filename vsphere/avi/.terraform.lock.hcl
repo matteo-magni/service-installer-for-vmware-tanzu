@@ -60,6 +60,14 @@ provider "registry.terraform.io/hashicorp/random" {
   ]
 }
 
+provider "registry.terraform.io/hashicorp/time" {
+  version     = "0.7.2"
+  constraints = "0.7.2"
+  hashes = [
+    "h1:/OoDbNb/z86XjvSlgna568gttFfAk9SoWRa277b3Pgw=",
+  ]
+}
+
 provider "registry.terraform.io/hashicorp/tls" {
   version     = "3.4.0"
   constraints = "3.4.0"

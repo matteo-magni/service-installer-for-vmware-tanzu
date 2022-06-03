@@ -1,36 +1,36 @@
 variable "vsphere_admin_user" {
-  type = string
-  sensitive = true
+  type        = string
+  sensitive   = true
   description = "Username to connect as for deploying the AVI infrastructure"
 }
 variable "vsphere_admin_password" {
-  type = string
-  sensitive = true
+  type        = string
+  sensitive   = true
   description = "`vsphere_admin_user`'s password"
 }
 variable "vsphere_admin_server" {
-  type = string
+  type        = string
   description = "vCenter IP address or FQDN to connect to for deploying the AVI infrastructure"
 }
 
 variable "vsphere_avi_folder" {
-  type = string
+  type        = string
   description = "VM folder for AVI"
 }
 variable "vsphere_avi_datacenter" {
-  type = string
+  type        = string
   description = "Datacenter for AVI"
 }
 variable "vsphere_avi_datastore" {
-  type = string
+  type        = string
   description = "Datastore for AVI"
 }
 variable "vsphere_avi_compute_cluster" {
-  type = string
+  type        = string
   description = "Compute cluster for AVI"
 }
 variable "vsphere_avi_network" {
-  type    = string
+  type        = string
   description = "Network for AVI"
 }
 variable "avi_controller_prefix" {
@@ -41,8 +41,8 @@ variable "avi_controller_prefix" {
 variable "avi_controller_network" {
   type = object({
     ip_address = string
-    netmask = string
-    gateway = string
+    netmask    = string
+    gateway    = string
   })
 }
 
@@ -53,8 +53,8 @@ variable "avi_provisioning_timeout" {
 }
 
 variable "avi_default_password" {
-  type = string
-  sensitive = true
+  type        = string
+  sensitive   = true
   description = "AVI default password (can be found in AVI downloads page). Do not disclose."
 }
 

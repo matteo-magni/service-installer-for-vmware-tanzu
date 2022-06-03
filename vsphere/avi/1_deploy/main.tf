@@ -49,10 +49,21 @@ resource "vsphere_virtual_machine" "avi_controller" {
   provisioner "local-exec" {
     command = "${path.module}/../scripts/wait_http.sh https://${var.avi_controller_network.ip_address} 200 ${var.avi_provisioning_timeout}"
   }
+}
+
+locals {
+  change_password = (var.avi_password == var.avi_default_password) ? 0 : 1
+}
+
+resource "null_resource" "avi_ready" {
+
+  triggers = {
+    avi_password = var.avi_password
+  }
 
   # change user default password
   provisioner "local-exec" {
-    command = "${path.module}/../scripts/avi.sh"
+    command = "if [[ ${local.change_password} == 1 ]]; then ${path.module}/../scripts/avi.sh; fi"
     environment = {
       AVI_METHOD   = "PUT"
       AVI_HOST     = var.avi_controller_network.ip_address
@@ -67,4 +78,8 @@ resource "vsphere_virtual_machine" "avi_controller" {
       })
     }
   }
+
+  depends_on = [
+    vsphere_virtual_machine.avi_controller
+  ]
 }

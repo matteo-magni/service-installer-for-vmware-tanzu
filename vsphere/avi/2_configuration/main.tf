@@ -5,17 +5,22 @@ resource "avi_cloud" "vsphere" {
   license_tier      = var.avi_license_tier
   license_type      = var.avi_license_type
   vtype             = "CLOUD_VCENTER"
-  ipam_provider_ref = avi_ipamdnsproviderprofile.vsphere_ipam.id
+  ipam_provider_ref = avi_ipamdnsproviderprofile.vsphere.id
 
   vcenter_configuration {
-    datacenter         = var.vsphere_datacenter
-    management_network = var.avi_mgmt_network_name
-    password           = var.vsphere_password
+    vcenter_url        = var.vsphere_cloud_server
+    username           = var.vsphere_cloud_user
+    password           = var.vsphere_cloud_password
+    datacenter         = var.vsphere_cloud_datacenter
+    management_network = var.vsphere_cloud_network
     privilege          = "WRITE_ACCESS"
-    username           = var.vsphere_user
-    vcenter_url        = var.vsphere_server
   }
 
+}
+
+resource "avi_ipamdnsproviderprofile" "vsphere" {
+  name = var.avi_cloud
+  type = "IPAMDNS_TYPE_INTERNAL"
 }
 
 resource "avi_network" "vip" {
@@ -117,13 +122,36 @@ resource "avi_vrfcontext" "vip" {
   }
 }
 
+# resource "null_resource" "vrfcontext_dereference" {
+#   triggers = {
+#     uuid           = avi_network.vip.uuid
+#     avi_username   = var.avi_username
+#     avi_password   = var.avi_password
+#     avi_controller = var.avi_controller
+#     avi_version    = var.avi_version
+#   }
+
+#   provisioner "local-exec" {
+#     when = destroy
+#     command = "JSON_BODY=$(${path.module}/../scripts/avi.sh | jq -cr '.vrf_context_ref=\"\"') ${path.module}/../scripts/avi.sh -m PUT"
+#     environment = {
+#       AVI_HOST     = self.triggers.avi_controller
+#       AVI_USER     = self.triggers.avi_username
+#       AVI_PASS     = self.triggers.avi_password
+#       AVI_VERSION  = self.triggers.avi_version
+#       AVI_ENDPOINT = "network/${self.triggers.uuid}"
+#     }
+#   }
+# }
+
+
 resource "null_resource" "avi_ipamdnsproviderprofile_usablenetworks" {
   triggers = {
-    ipam_uuid      = avi_ipamdnsproviderprofile.vsphere_ipam.uuid
-    avi_username   = data.terraform_remote_state.deploy.outputs.avi_config.avi_username
-    avi_password   = data.terraform_remote_state.deploy.outputs.avi_config.avi_password
-    avi_controller = data.terraform_remote_state.deploy.outputs.avi_config.avi_controller
-    avi_version    = data.terraform_remote_state.deploy.outputs.avi_config.avi_version
+    ipam_uuid      = avi_ipamdnsproviderprofile.vsphere.uuid
+    avi_username   = var.avi_username
+    avi_password   = var.avi_password
+    avi_controller = var.avi_controller
+    avi_version    = var.avi_version
     ipam_http_body_apply = jsonencode({
       replace = {
         internal_profile = {
@@ -149,7 +177,7 @@ resource "null_resource" "avi_ipamdnsproviderprofile_usablenetworks" {
   }
 
   provisioner "local-exec" {
-    command = "../scripts/avi.sh"
+    command = "${path.module}/../scripts/avi.sh"
     environment = {
       AVI_METHOD   = "PATCH"
       AVI_HOST     = self.triggers.avi_controller
@@ -163,7 +191,7 @@ resource "null_resource" "avi_ipamdnsproviderprofile_usablenetworks" {
 
   provisioner "local-exec" {
     when    = destroy
-    command = "../scripts/avi.sh"
+    command = "${path.module}/../scripts/avi.sh"
     environment = {
       AVI_METHOD   = "PATCH"
       AVI_HOST     = self.triggers.avi_controller
@@ -176,27 +204,16 @@ resource "null_resource" "avi_ipamdnsproviderprofile_usablenetworks" {
   }
 
   depends_on = [
-    avi_ipamdnsproviderprofile.vsphere_ipam,
+    avi_ipamdnsproviderprofile.vsphere,
     avi_network.vip,
   ]
 }
 
-resource "avi_ipamdnsproviderprofile" "vsphere_ipam" {
-  name = "vsphere_ipam"
-  type = "IPAMDNS_TYPE_INTERNAL"
+locals {
+  avi_serviceenginegroup_name = var.avi_serviceenginegroup_name == "" ? var.avi_cloud : var.avi_serviceenginegroup_name
 }
-
-data "vsphere_datacenter" "datacenter" {
-  name = var.vsphere_datacenter
-}
-
-data "vsphere_compute_cluster" "se" {
-  name          = var.seg_vcenter_cluster
-  datacenter_id = data.vsphere_datacenter.datacenter.id
-}
-
-resource "avi_serviceenginegroup" "default" {
-  name      = "default"
+resource "avi_serviceenginegroup" "vsphere_default" {
+  name      = local.avi_serviceenginegroup_name
   cloud_ref = avi_cloud.vsphere.id
 
   active_standby            = var.avi_ha_mode == "HA_MODE_LEGACY_ACTIVE_STANDBY" ? true : false
@@ -213,7 +230,7 @@ resource "avi_serviceenginegroup" "default" {
   min_scaleout_per_vs       = var.min_scaleout_per_vs
   max_scaleout_per_vs       = var.max_scaleout_per_vs
   dedicated_dispatcher_core = var.dedicated_dispatcher_core
-  vcenter_folder            = var.seg_vcenter_folder
+  vcenter_folder            = var.se_vcenter_folder
   vcenter_clusters {
     cluster_refs = [
       "https://${var.avi_controller}/api/vimgrclusterruntime/${data.vsphere_compute_cluster.se.id}-${avi_cloud.vsphere.uuid}"
@@ -222,3 +239,27 @@ resource "avi_serviceenginegroup" "default" {
   }
   se_deprovision_delay = var.se_deprovision_delay
 }
+
+# # workaround to issue https://github.com/vmware/terraform-provider-avi/issues/376
+# resource "null_resource" "seg_destroy" {
+#   triggers = {
+#     uuid           = avi_serviceenginegroup.vsphere_default.uuid
+#     avi_username   = var.avi_username
+#     avi_password   = var.avi_password
+#     avi_controller = var.avi_controller
+#     avi_version    = var.avi_version
+#   }
+
+#   provisioner "local-exec" {
+#     when    = destroy
+#     command = "${path.module}/../scripts/avi.sh"
+#     environment = {
+#       AVI_METHOD   = "DELETE"
+#       AVI_HOST     = self.triggers.avi_controller
+#       AVI_USER     = self.triggers.avi_username
+#       AVI_PASS     = self.triggers.avi_password
+#       AVI_VERSION  = self.triggers.avi_version
+#       AVI_ENDPOINT = "serviceenginegroup/${self.triggers.uuid}"
+#     }
+#   }
+# }

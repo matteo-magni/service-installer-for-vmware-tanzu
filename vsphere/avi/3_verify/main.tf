@@ -1,7 +1,7 @@
 resource "avi_pool" "dummy" {
   name      = "dummy"
-  cloud_ref = data.avi_cloud.cloud.id
-  vrf_ref   = data.avi_network.vip.vrf_context_ref
+  cloud_ref = data.avi_cloud.vsphere.id
+  vrf_ref   = var.avi_vfr_context_vip_id
 
   servers {
     ip {
@@ -13,8 +13,8 @@ resource "avi_pool" "dummy" {
 
 resource "avi_vsvip" "dummy" {
   name            = "dummy"
-  cloud_ref       = data.avi_cloud.cloud.id
-  vrf_context_ref = data.avi_network.vip.vrf_context_ref
+  cloud_ref       = data.avi_cloud.vsphere.id
+  vrf_context_ref = var.avi_vfr_context_vip_id
   ipam_selector {
     type = "SELECTOR_IPAM"
     labels {
@@ -26,12 +26,8 @@ resource "avi_vsvip" "dummy" {
     vip_id                = "dummy"
     auto_allocate_ip_type = "V4_ONLY"
     auto_allocate_ip      = true
-    # ip_address {
-    #   addr = var.avi_dummy_vip
-    #   type = "V4"
-    # }
     ipam_network_subnet {
-      network_ref = data.avi_network.vip.id
+      network_ref = var.avi_network_vip_id
       subnet {
         ip_addr {
           addr = var.avi_vip_network_addr
@@ -50,17 +46,17 @@ resource "avi_virtualservice" "dummy" {
   }
   application_profile_ref = data.avi_applicationprofile.l4.id
   type                    = "VS_TYPE_NORMAL"
-  cloud_ref               = data.avi_cloud.cloud.id
+  cloud_ref               = data.avi_cloud.vsphere.id
   cloud_type              = "CLOUD_VCENTER"
   pool_ref                = avi_pool.dummy.id
   vsvip_ref               = avi_vsvip.dummy.id
-  se_group_ref            = data.avi_serviceenginegroup.group.id
-  vrf_context_ref         = data.avi_network.vip.vrf_context_ref
+  se_group_ref            = var.avi_serviceenginegroup_id
+  vrf_context_ref         = var.avi_vfr_context_vip_id
 }
 
 # wait 60 seconds to allow Service Engines VMs to be created
 resource "time_sleep" "wait_for_ses" {
-  create_duration = "60s"
+  create_duration = "120s"
 
   depends_on = [
     avi_virtualservice.dummy
@@ -83,7 +79,9 @@ resource "vsphere_virtual_machine" "ubuntu" {
   guest_id = "ubuntu64Guest"
 
   network_interface {
-    network_id = data.vsphere_network.network.id
+    network_id     = data.vsphere_network.network.id
+    use_static_mac = (var.static_mac_address != "")
+    mac_address    = var.static_mac_address
   }
   disk {
     label            = "disk0"
@@ -119,7 +117,7 @@ resource "vsphere_virtual_machine" "ubuntu" {
   }
 
   provisioner "local-exec" {
-    command = "../scripts/wait_http.sh http://${split("/", var.testvm_ip_cidr)[0]} 200 60"
+    command = "${path.module}/../scripts/wait_http.sh http://${split("/", var.testvm_ip_cidr)[0]} 200 180"
   }
 
 }

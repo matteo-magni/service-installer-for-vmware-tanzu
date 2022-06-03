@@ -38,9 +38,19 @@ terraform {
 }
 
 provider "vsphere" {
+  alias          = "admin"
   user           = var.vsphere_admin_user
   password       = var.vsphere_admin_password
   vsphere_server = var.vsphere_admin_server
+
+  allow_unverified_ssl = true
+}
+
+provider "vsphere" {
+  alias          = "cloud"
+  user           = var.vsphere_cloud_user
+  password       = var.vsphere_cloud_password
+  vsphere_server = var.vsphere_cloud_server
 
   allow_unverified_ssl = true
 }
