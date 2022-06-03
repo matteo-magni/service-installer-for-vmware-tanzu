@@ -11,7 +11,7 @@ resource "tls_private_key" "avi_controller" {
 }
 
 resource "vsphere_virtual_machine" "avi_controller" {
-  name             = "${var.avi_controller_prefix}-${random_string.avi_controller_name.id}"
+  name             = "${var.avi_controller_prefix}-${random_string.avi_controller_name.result}"
   resource_pool_id = data.vsphere_resource_pool.default.id
   datastore_id     = data.vsphere_datastore.datastore.id
   folder           = trimprefix(data.vsphere_folder.folder.path, "/${data.vsphere_datacenter.datacenter.name}/vm")
@@ -33,9 +33,9 @@ resource "vsphere_virtual_machine" "avi_controller" {
   }
   vapp {
     properties = {
-      "default-gw"          = var.avi_gateway
-      "mgmt-ip"             = var.avi_ipaddress
-      "mgmt-mask"           = var.avi_netmask
+      "default-gw"          = var.avi_controller_network.gateway
+      "mgmt-ip"             = var.avi_controller_network.ip_address
+      "mgmt-mask"           = var.avi_controller_network.netmask
       "sysadmin-public-key" = tls_private_key.avi_controller.public_key_openssh
     }
   }
@@ -47,37 +47,24 @@ resource "vsphere_virtual_machine" "avi_controller" {
 
   # wait for https endpoint to be available
   provisioner "local-exec" {
-    command = "../scripts/wait_http.sh https://${var.avi_ipaddress} 200 ${var.avi_provisioning_timeout}"
+    command = "${path.module}/../scripts/wait_http.sh https://${var.avi_controller_network.ip_address} 200 ${var.avi_provisioning_timeout}"
   }
 
   # change user default password
   provisioner "local-exec" {
-    command = "../scripts/avi.sh"
+    command = "${path.module}/../scripts/avi.sh"
     environment = {
       AVI_METHOD   = "PUT"
-      AVI_HOST     = var.avi_ipaddress
+      AVI_HOST     = var.avi_controller_network.ip_address
       AVI_USER     = var.avi_username
       AVI_PASS     = var.avi_default_password
       AVI_VERSION  = var.avi_version
       AVI_ENDPOINT = "useraccount"
       JSON_BODY = jsonencode({
         username     = var.avi_username
-        password     = local.avi_password
+        password     = var.avi_password
         old_password = var.avi_default_password
       })
     }
   }
-
-}
-
-locals {
-  avi_password = var.avi_password == "" ? var.avi_default_password : (var.avi_password == "RANDOM" ? random_string.avi_password.id : var.avi_password)
-}
-
-resource "random_string" "avi_password" {
-  length  = 32
-  special = true
-  lower   = true
-  upper   = true
-  number  = true
 }

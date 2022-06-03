@@ -37,21 +37,18 @@ terraform {
 
 }
 
-# provider "vsphere" {
-#   user           = var.vsphere_user
-#   password       = var.vsphere_password
-#   vsphere_server = var.vsphere_server
+provider "vsphere" {
+  user           = var.vsphere_admin_user
+  password       = var.vsphere_admin_password
+  vsphere_server = var.vsphere_admin_server
 
-#   allow_unverified_ssl = true
-# }
+  allow_unverified_ssl = true
+}
 
-# provider "avi" {
-#   avi_username   = var.avi_username
-#   avi_tenant     = var.avi_tenant
-#   avi_password   = local.avi_password
-#   avi_controller = var.avi_ipaddress
-#   avi_version    = var.avi_version
-# }
-
-# provider "vsphere" {}
-# provider "avi" {}
+provider "avi" {
+  avi_username   = var.avi_username
+  avi_tenant     = var.avi_tenant
+  avi_password   = local.avi_password
+  avi_controller = var.avi_controller_network.ip_address
+  avi_version    = var.avi_version
+}

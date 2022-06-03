@@ -1,8 +1,8 @@
 locals {
-  backup_passphrase = var.avi_backup_passphrase == "" ? random_string.backup_passphrase.id : var.avi_backup_passphrase
+  backup_passphrase = var.avi_backup_passphrase == "" ? random_password.backup_passphrase.result : var.avi_backup_passphrase
 }
 
-resource "random_string" "backup_passphrase" {
+resource "random_password" "backup_passphrase" {
   length  = 32
   special = false
   lower   = true
@@ -110,12 +110,12 @@ resource "avi_systemconfiguration" "default" {
 resource "null_resource" "license" {
   count = var.avi_license_key != "" ? 1 : 0
   provisioner "local-exec" {
-    command = "../scripts/avi.sh"
+    command = "${path.module}/../scripts/avi.sh"
     environment = {
       AVI_METHOD   = "PUT"
-      AVI_HOST     = var.avi_ipaddress
+      AVI_HOST     = var.avi_controller_network.ip_address
       AVI_USER     = var.avi_username
-      AVI_PASS     = local.avi_password
+      AVI_PASS     = var.avi_password
       AVI_VERSION  = var.avi_version
       AVI_ENDPOINT = "licensing"
       JSON_BODY    = jsonencode({ serial_key = var.avi_license_key })
@@ -171,7 +171,7 @@ locals {
 resource "avi_sslkeyandcertificate" "ca" {
   for_each = local.ca_objects
 
-  name = "ca-${random_string.avi_controller_name.id}-${each.value.serial_number}"
+  name = "ca-${random_string.avi_controller_name.result}-${each.value.serial_number}"
   type = "SSL_CERTIFICATE_TYPE_CA"
   certificate {
     certificate = each.value.cert_pem
@@ -196,7 +196,7 @@ resource "avi_sslprofile" "mozilla_intermediate" {
   # accepted_versions {
   #   type = "SSL_VERSION_TLS1_3"  # not supported yet
   # }
-  accepted_ciphers = "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384"
+  accepted_ciphers = "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384"
   ciphersuites     = "TLS_AES_128_GCM_SHA256:TLS_AES_256_GCM_SHA384"
   cipher_enums = [
     "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",

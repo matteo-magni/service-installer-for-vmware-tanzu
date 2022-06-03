@@ -33,10 +33,6 @@ variable "vsphere_avi_network" {
   type    = string
   description = "Network for AVI"
 }
-variable "avi_controller_prefix" {
-  type    = string
-  default = "avi-controller"
-}
 
 variable "avi_controller_network" {
   type = object({
@@ -44,95 +40,91 @@ variable "avi_controller_network" {
     netmask = string
     gateway = string
   })
+  description = "IPv4 network settings for AVI controller"
 }
-
-variable "avi_provisioning_timeout" {
-  type        = string
-  default     = "20m"
-  description = "Maximum time for AVI controller to be ready after VM creation"
-}
-
-variable "avi_default_password" {
-  type = string
-  sensitive = true
-  description = "AVI default password (can be found in AVI downloads page). Do not disclose."
-}
-
 variable "avi_tenant" {
   type    = string
   default = "admin"
 }
-
 variable "avi_username" {
   type      = string
   sensitive = true
   default   = "admin"
 }
-
+variable "avi_default_password" {
+  type = string
+  sensitive = true
+  description = "AVI default password (can be found in AVI downloads page). Do not disclose."
+}
 variable "avi_password" {
   type        = string
   default     = ""
   sensitive   = true
   description = "New password to be set or \"RANDOM\" for a random password or blank to keep the default"
 }
-
 variable "avi_version" {
   type    = string
   default = "21.1.4"
+  description = "Version of the AVI controller, it depends on the downloaded OVA."
 }
 
 variable "avi_ssl_key" {
   type      = string
   default   = ""
   sensitive = true
+  description = "SSL private key for the AVI portal (optional)"
 }
-
 variable "avi_ssl_certificate" {
   type    = string
   default = ""
+  description = "SSL certificate for the AVI portal (optional)"
 }
-
 variable "avi_ssl_cacerts" {
   type    = string
   default = ""
+  description = "SSL CA certificates for the AVI portal (optional)"
 }
 
 variable "avi_backup_passphrase" {
   type      = string
   default   = ""
   sensitive = true
+  description = "AVI backup passphrase. If not provided it will be randomly generated."
 }
 
 variable "avi_dns_domain" {
   type    = string
   default = ""
+  description = "AVI DNS search domain"
 }
-
 variable "avi_dns_servers_ipv4" {
   type = set(string)
+  description = "AVI DNS servers list"
 }
-
 variable "avi_ntp_servers_fqdn" {
   type = set(string)
   default = [
     "pool.ntp.org"
   ]
+  description = "AVI NTP servers FQDN list"
 }
 
 variable "avi_session_timeout" {
   type    = number
   default = 15
+  description = "AVI UI session timeout"
 }
 
 variable "avi_license_key" {
   type      = string
   default   = ""
   sensitive = true
+  description = "AVI license key"
 }
-
 variable "avi_license_tier" {
   type    = string
   default = "ESSENTIALS"
+  description = "AVI license tier. Must be either ESSENTIALS or ENTERPRISE."
 
   validation {
     condition     = contains(["ESSENTIALS", "ENTERPRISE"], var.avi_license_tier)
@@ -145,7 +137,6 @@ variable "vsphere_content_library_avi" {
   default     = "ova"
   description = "Name of the content library that stores the AVI controller OVA"
 }
-
 variable "vsphere_content_library_item_avi" {
   type        = string
   default     = "avi-controller-21.1.4-9210"
