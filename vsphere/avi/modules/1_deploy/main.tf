@@ -47,7 +47,7 @@ resource "vsphere_virtual_machine" "avi_controller" {
 
   # wait for https endpoint to be available
   provisioner "local-exec" {
-    command = "${path.module}/../scripts/wait_http.sh https://${var.avi_controller_network.ip_address} 200 ${var.avi_provisioning_timeout}"
+    command = "${path.module}/../../scripts/wait_http.sh https://${var.avi_controller_network.ip_address} 200 ${var.avi_provisioning_timeout}"
   }
 }
 
@@ -63,7 +63,7 @@ resource "null_resource" "avi_ready" {
 
   # change user default password
   provisioner "local-exec" {
-    command = "if [[ ${local.change_password} == 1 ]]; then ${path.module}/../scripts/avi.sh; fi"
+    command = "if [[ ${local.change_password} == 1 ]]; then ${path.module}/../../scripts/avi.sh; fi"
     environment = {
       AVI_METHOD   = "PUT"
       AVI_HOST     = var.avi_controller_network.ip_address

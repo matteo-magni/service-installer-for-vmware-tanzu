@@ -133,7 +133,7 @@ resource "avi_vrfcontext" "vip" {
 
 #   provisioner "local-exec" {
 #     when = destroy
-#     command = "JSON_BODY=$(${path.module}/../scripts/avi.sh | jq -cr '.vrf_context_ref=\"\"') ${path.module}/../scripts/avi.sh -m PUT"
+#     command = "JSON_BODY=$(${path.module}/../../scripts/avi.sh | jq -cr '.vrf_context_ref=\"\"') ${path.module}/../../scripts/avi.sh -m PUT"
 #     environment = {
 #       AVI_HOST     = self.triggers.avi_controller
 #       AVI_USER     = self.triggers.avi_username
@@ -177,7 +177,7 @@ resource "null_resource" "avi_ipamdnsproviderprofile_usablenetworks" {
   }
 
   provisioner "local-exec" {
-    command = "${path.module}/../scripts/avi.sh"
+    command = "${path.module}/../../scripts/avi.sh"
     environment = {
       AVI_METHOD   = "PATCH"
       AVI_HOST     = self.triggers.avi_controller
@@ -191,7 +191,7 @@ resource "null_resource" "avi_ipamdnsproviderprofile_usablenetworks" {
 
   provisioner "local-exec" {
     when    = destroy
-    command = "${path.module}/../scripts/avi.sh"
+    command = "${path.module}/../../scripts/avi.sh"
     environment = {
       AVI_METHOD   = "PATCH"
       AVI_HOST     = self.triggers.avi_controller
@@ -240,26 +240,26 @@ resource "avi_serviceenginegroup" "vsphere_default" {
   se_deprovision_delay = var.se_deprovision_delay
 }
 
-# # workaround to issue https://github.com/vmware/terraform-provider-avi/issues/376
-# resource "null_resource" "seg_destroy" {
-#   triggers = {
-#     uuid           = avi_serviceenginegroup.vsphere_default.uuid
-#     avi_username   = var.avi_username
-#     avi_password   = var.avi_password
-#     avi_controller = var.avi_controller
-#     avi_version    = var.avi_version
-#   }
+# workaround to issue https://github.com/vmware/terraform-provider-avi/issues/376
+resource "null_resource" "seg_destroy" {
+  triggers = {
+    uuid           = avi_serviceenginegroup.vsphere_default.uuid
+    avi_username   = var.avi_username
+    avi_password   = var.avi_password
+    avi_controller = var.avi_controller
+    avi_version    = var.avi_version
+  }
 
-#   provisioner "local-exec" {
-#     when    = destroy
-#     command = "${path.module}/../scripts/avi.sh"
-#     environment = {
-#       AVI_METHOD   = "DELETE"
-#       AVI_HOST     = self.triggers.avi_controller
-#       AVI_USER     = self.triggers.avi_username
-#       AVI_PASS     = self.triggers.avi_password
-#       AVI_VERSION  = self.triggers.avi_version
-#       AVI_ENDPOINT = "serviceenginegroup/${self.triggers.uuid}"
-#     }
-#   }
-# }
+  provisioner "local-exec" {
+    when    = destroy
+    command = "${path.module}/../../scripts/avi.sh"
+    environment = {
+      AVI_METHOD   = "DELETE"
+      AVI_HOST     = self.triggers.avi_controller
+      AVI_USER     = self.triggers.avi_username
+      AVI_PASS     = self.triggers.avi_password
+      AVI_VERSION  = self.triggers.avi_version
+      AVI_ENDPOINT = "serviceenginegroup/${self.triggers.uuid}"
+    }
+  }
+}

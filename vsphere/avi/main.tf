@@ -11,7 +11,7 @@ resource "random_password" "avi_password" {
 }
 
 module "deploy" {
-  source = "./1_deploy"
+  source = "./modules/1_deploy"
   providers = {
     vsphere = vsphere.admin
   }
@@ -47,7 +47,7 @@ module "deploy" {
 }
 
 module "configuration" {
-  source = "./2_configuration"
+  source = "./modules/2_configuration"
 
   depends_on = [
     module.deploy
@@ -103,7 +103,8 @@ module "configuration" {
 }
 
 module "verify" {
-  source = "./3_verify"
+  source = "./modules/3_verify"
+  count  = var.run_test ? 1 : 0
 
   depends_on = [
     module.configuration

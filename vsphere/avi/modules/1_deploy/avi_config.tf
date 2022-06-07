@@ -110,7 +110,7 @@ resource "avi_systemconfiguration" "default" {
 resource "null_resource" "license" {
   count = var.avi_license_key != "" ? 1 : 0
   provisioner "local-exec" {
-    command = "${path.module}/../scripts/avi.sh"
+    command = "${path.module}/../../scripts/avi.sh"
     environment = {
       AVI_METHOD   = "PUT"
       AVI_HOST     = var.avi_controller_network.ip_address

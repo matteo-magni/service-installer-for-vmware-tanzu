@@ -292,6 +292,10 @@ variable "avi_serviceenginegroup_name" {
 
 ##### BEGIN VERIFY VARIABLES #####
 
+variable "run_test" {
+  type    = bool
+  default = true
+}
 variable "avi_dummy_vip" {
   type = string
 }
@@ -317,9 +321,6 @@ variable "vsphere_datastore_test" {
 variable "vsphere_compute_cluster_test" {
   type = string
 }
-# variable "vsphere_host_test" {
-#   type = string
-# }
 variable "vsphere_network_test" {
   type = string
 }

@@ -117,7 +117,7 @@ resource "vsphere_virtual_machine" "ubuntu" {
   }
 
   provisioner "local-exec" {
-    command = "${path.module}/../scripts/wait_http.sh http://${split("/", var.testvm_ip_cidr)[0]} 200 180"
+    command = "${path.module}/../../scripts/wait_http.sh http://${split("/", var.testvm_ip_cidr)[0]} 200 180"
   }
 
 }
