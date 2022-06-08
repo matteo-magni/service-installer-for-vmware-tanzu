@@ -17,11 +17,6 @@ data "vsphere_resource_pool" "default" {
   datacenter_id = data.vsphere_datacenter.datacenter.id
 }
 
-# data "vsphere_host" "host" {
-#   name          = var.vsphere_host
-#   datacenter_id = data.vsphere_datacenter.datacenter.id
-# }
-
 data "vsphere_network" "network" {
   name          = var.vsphere_avi_network
   datacenter_id = data.vsphere_datacenter.datacenter.id

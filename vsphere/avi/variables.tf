@@ -36,6 +36,10 @@ variable "vsphere_avi_network" {
   description = "Network for AVI"
 }
 
+variable "avi_portal_fqdn" {
+  type = string
+}
+
 variable "avi_controller_network" {
   type = object({
     ip_address = string
@@ -131,6 +135,15 @@ variable "avi_license_tier" {
   validation {
     condition     = contains(["ESSENTIALS", "ENTERPRISE"], var.avi_license_tier)
     error_message = "Allowed values for avi_license_tier are \"ESSENTIALS\" or \"ENTERPRISE\"."
+  }
+}
+
+variable "se_app_cache_percent" {
+  type    = number
+  default = 10
+  validation {
+    condition     = 0 <= var.se_app_cache_percent && var.se_app_cache_percent <= 100
+    error_message = "Acceptable values are numbers between 0 and 100"
   }
 }
 

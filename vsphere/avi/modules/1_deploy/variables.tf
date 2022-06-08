@@ -33,9 +33,26 @@ variable "vsphere_avi_network" {
   type        = string
   description = "Network for AVI"
 }
+
+variable "vsphere_content_library_avi" {
+  type        = string
+  default     = "ova"
+  description = "Name of the content library that stores the AVI controller OVA"
+}
+
+variable "vsphere_content_library_item_avi" {
+  type        = string
+  default     = "avi-controller-21.1.4-9210"
+  description = "Name of the AVi controller OVA in `vsphere_content_library_avi` content library"
+}
+
 variable "avi_controller_prefix" {
   type    = string
   default = "avi-controller"
+}
+
+variable "avi_portal_fqdn" {
+  type = string
 }
 
 variable "avi_controller_network" {
@@ -140,14 +157,3 @@ variable "avi_license_tier" {
   }
 }
 
-variable "vsphere_content_library_avi" {
-  type        = string
-  default     = "ova"
-  description = "Name of the content library that stores the AVI controller OVA"
-}
-
-variable "vsphere_content_library_item_avi" {
-  type        = string
-  default     = "avi-controller-21.1.4-9210"
-  description = "Name of the AVi controller OVA in `vsphere_content_library_avi` content library"
-}

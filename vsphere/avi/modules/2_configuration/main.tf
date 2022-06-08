@@ -82,29 +82,51 @@ resource "avi_network" "se" {
   }
 }
 
-resource "avi_vrfcontext" "se" {
-  name      = "se"
-  cloud_ref = avi_cloud.vsphere.id
+# resource "avi_vrfcontext" "management" {
+#   name      = "management"
+#   cloud_ref = avi_cloud.vsphere.id
+#   # system_default = true
 
-  static_routes {
-    route_id = "1"
-    next_hop {
-      addr = var.avi_se_network_gateway
-      type = "V4"
-    }
-    prefix {
-      ip_addr {
-        addr = "0.0.0.0"
-        type = "V4"
-      }
-      mask = "0"
-    }
-  }
-}
+#   static_routes {
+#     route_id = "1"
+#     next_hop {
+#       addr = var.avi_se_network_gateway
+#       type = "V4"
+#     }
+#     prefix {
+#       ip_addr {
+#         addr = "0.0.0.0"
+#         type = "V4"
+#       }
+#       mask = "0"
+#     }
+#   }
+# }
+
+# resource "avi_vrfcontext" "vip" {
+#   name      = "vip"
+#   cloud_ref = avi_cloud.vsphere.id
+
+#   static_routes {
+#     route_id = "1"
+#     next_hop {
+#       addr = var.avi_vip_network_gateway
+#       type = "V4"
+#     }
+#     prefix {
+#       ip_addr {
+#         addr = "0.0.0.0"
+#         type = "V4"
+#       }
+#       mask = "0"
+#     }
+#   }
+# }
 
 resource "avi_vrfcontext" "vip" {
-  name      = "vip"
-  cloud_ref = avi_cloud.vsphere.id
+  name           = "global"
+  cloud_ref      = avi_cloud.vsphere.id
+  system_default = true
 
   static_routes {
     route_id = "1"
@@ -231,6 +253,10 @@ resource "avi_serviceenginegroup" "vsphere_default" {
   max_scaleout_per_vs       = var.max_scaleout_per_vs
   dedicated_dispatcher_core = var.dedicated_dispatcher_core
   vcenter_folder            = var.se_vcenter_folder
+  se_dp_max_hb_version      = 2
+  hm_on_standby             = var.avi_license_tier == "ENTERPRISE" ? true : false
+  app_cache_percent         = var.avi_license_tier == "ENTERPRISE" ? var.se_app_cache_percent : 0
+
   vcenter_clusters {
     cluster_refs = [
       "https://${var.avi_controller}/api/vimgrclusterruntime/${data.vsphere_compute_cluster.se.id}-${avi_cloud.vsphere.uuid}"

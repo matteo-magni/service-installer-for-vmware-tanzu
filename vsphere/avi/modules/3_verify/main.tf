@@ -1,7 +1,8 @@
 resource "avi_pool" "dummy" {
-  name      = "dummy"
-  cloud_ref = data.avi_cloud.vsphere.id
-  vrf_ref   = var.avi_vfr_context_vip_id
+  name                     = "dummy"
+  cloud_ref                = data.avi_cloud.vsphere.id
+  vrf_ref                  = var.avi_vfr_context_vip_id
+  connection_ramp_duration = 0
 
   servers {
     ip {
@@ -15,13 +16,13 @@ resource "avi_vsvip" "dummy" {
   name            = "dummy"
   cloud_ref       = data.avi_cloud.vsphere.id
   vrf_context_ref = var.avi_vfr_context_vip_id
-  ipam_selector {
-    type = "SELECTOR_IPAM"
-    labels {
-      key   = "cloud"
-      value = var.avi_cloud
-    }
-  }
+  # ipam_selector {
+  #   type = "SELECTOR_IPAM"
+  #   labels {
+  #     key   = "cloud"
+  #     value = var.avi_cloud
+  #   }
+  # }
   vip {
     vip_id                = "dummy"
     auto_allocate_ip_type = "V4_ONLY"
@@ -52,15 +53,7 @@ resource "avi_virtualservice" "dummy" {
   vsvip_ref               = avi_vsvip.dummy.id
   se_group_ref            = var.avi_serviceenginegroup_id
   vrf_context_ref         = var.avi_vfr_context_vip_id
-}
-
-# wait 60 seconds to allow Service Engines VMs to be created
-resource "time_sleep" "wait_for_ses" {
-  create_duration = "120s"
-
-  depends_on = [
-    avi_virtualservice.dummy
-  ]
+  enable_autogw           = false
 }
 
 resource "random_pet" "ubuntu" {
@@ -122,11 +115,14 @@ resource "vsphere_virtual_machine" "ubuntu" {
 
 }
 
-data "http" "vip" {
-  url = "http://${local.vip_addr}"
+resource "null_resource" "wait_for_ses" {
+  provisioner "local-exec" {
+    command = "${path.module}/../../scripts/wait_http.sh http://${local.vip_addr} 200 300"
+  }
 
   depends_on = [
     vsphere_virtual_machine.ubuntu,
-    time_sleep.wait_for_ses,
+    avi_virtualservice.dummy,
   ]
+
 }

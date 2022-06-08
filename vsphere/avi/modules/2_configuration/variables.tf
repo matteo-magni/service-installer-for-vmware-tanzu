@@ -85,7 +85,14 @@ variable "avi_se_network_begin" {
 variable "avi_se_network_end" {
   type = string
 }
-
+variable "se_app_cache_percent" {
+  type    = number
+  default = 10
+  validation {
+    condition     = 0 <= var.se_app_cache_percent && var.se_app_cache_percent <= 100
+    error_message = "Acceptable values are numbers between 0 and 100"
+  }
+}
 variable "se_name_prefix" {
   type    = string
   default = "Avi"
@@ -129,7 +136,7 @@ variable "max_scaleout_per_vs" {
 }
 variable "algo" {
   type    = string
-  default = "PLACEMENT_ALGO_PACKED"
+  default = "PLACEMENT_ALGO_DISTRIBUTED"
   validation {
     condition     = contains(["PLACEMENT_ALGO_PACKED", "PLACEMENT_ALGO_DISTRIBUTED"], var.algo)
     error_message = "Acceptable values: PLACEMENT_ALGO_PACKED, PLACEMENT_ALGO_DISTRIBUTED"

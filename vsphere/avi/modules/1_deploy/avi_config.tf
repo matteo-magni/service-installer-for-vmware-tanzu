@@ -20,18 +20,18 @@ resource "avi_backupconfiguration" "default" {
   ]
 }
 
-resource "avi_controllerproperties" "default" {
-  api_idle_timeout = var.avi_session_timeout
-  ssl_certificate_expiry_warning_days = [
-    30,
-    7,
-    1,
-  ]
+# resource "avi_controllerproperties" "default" {
+#   api_idle_timeout = var.avi_session_timeout
+#   # ssl_certificate_expiry_warning_days = [
+#   #   30,
+#   #   7,
+#   #   1,
+#   # ]
 
-  depends_on = [
-    null_resource.avi_ready
-  ]
-}
+#   depends_on = [
+#     null_resource.avi_ready
+#   ]
+# }
 
 resource "avi_systemconfiguration" "default" {
 
@@ -97,8 +97,10 @@ resource "avi_systemconfiguration" "default" {
     redirect_to_https              = true
     http_port                      = 80
     https_port                     = 443
-    sslkeyandcertificate_refs      = local.ssl_certificate_provided ? avi_sslkeyandcertificate.controller[*].id : []
-    sslprofile_ref                 = avi_sslprofile.mozilla_intermediate.id
+    sslkeyandcertificate_refs = [
+      avi_sslkeyandcertificate.controller.id
+    ]
+    sslprofile_ref = avi_sslprofile.mozilla_intermediate.id
   }
 
   depends_on = [
@@ -128,15 +130,45 @@ resource "null_resource" "license" {
 }
 
 locals {
-  ssl_certificate_provided = (var.avi_ssl_key != "" && var.avi_ssl_certificate != "")
+  external_cert = (var.avi_ssl_key != "" && var.avi_ssl_certificate != "")
+}
+
+resource "tls_private_key" "portal" {
+  count     = local.external_cert ? 0 : 1
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+
+resource "tls_self_signed_cert" "portal" {
+  count           = local.external_cert ? 0 : 1
+  private_key_pem = tls_private_key.portal[0].private_key_pem
+
+  subject {
+    common_name  = var.avi_portal_fqdn
+    organization = "VMware Inc"
+  }
+
+  dns_names = [
+    var.avi_portal_fqdn
+  ]
+
+  ip_addresses = [
+    var.avi_controller_network.ip_address
+  ]
+
+  validity_period_hours = 24 * 365
+
+  allowed_uses = [
+    "key_encipherment",
+    "digital_signature",
+    "server_auth",
+  ]
 }
 
 resource "avi_sslkeyandcertificate" "controller" {
-  count = local.ssl_certificate_provided ? 1 : 0
-
   name = "controller-${random_string.avi_controller_name.id}"
   type = "SSL_CERTIFICATE_TYPE_SYSTEM"
-  key  = var.avi_ssl_key
+  key  = local.external_cert ? var.avi_ssl_key : tls_private_key.portal[0].private_key_pem
 
   dynamic "ca_certs" {
     for_each = avi_sslkeyandcertificate.ca
@@ -146,7 +178,7 @@ resource "avi_sslkeyandcertificate" "controller" {
     }
   }
   certificate {
-    certificate = var.avi_ssl_certificate
+    certificate = local.external_cert ? var.avi_ssl_certificate : tls_self_signed_cert.portal[0].cert_pem
   }
 
   depends_on = [
@@ -163,8 +195,7 @@ data "tls_certificate" "ca" {
 
 locals {
   # temporary local variable to store info about CAs
-  ca_objects   = { for i, x in flatten(data.tls_certificate.ca[*].certificates) : "ca-${i}" => x }
-  tls_versions = []
+  ca_objects = { for i, x in flatten(data.tls_certificate.ca[*].certificates) : "ca-${i}" => x }
 }
 
 # create cert objects for each CA

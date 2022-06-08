@@ -26,6 +26,7 @@ module "deploy" {
   vsphere_avi_compute_cluster = var.vsphere_avi_compute_cluster
   vsphere_avi_network         = var.vsphere_avi_network
 
+  avi_portal_fqdn                  = var.avi_portal_fqdn
   avi_controller_network           = var.avi_controller_network
   avi_default_password             = var.avi_default_password
   avi_tenant                       = var.avi_tenant
@@ -100,6 +101,7 @@ module "configuration" {
   se_vsphere_cluster        = var.se_vsphere_cluster
   se_deprovision_delay      = var.se_deprovision_delay
   buffer_se                 = var.buffer_se
+  se_app_cache_percent      = var.se_app_cache_percent
 }
 
 module "verify" {
@@ -135,5 +137,5 @@ module "verify" {
   vsphere_content_library_ubuntu      = var.vsphere_content_library_ubuntu
   vsphere_content_library_item_ubuntu = var.vsphere_content_library_item_ubuntu
 
-  static_mac_address = var.static_mac_address
+  # static_mac_address = var.static_mac_address
 }
